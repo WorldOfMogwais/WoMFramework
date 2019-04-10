@@ -1,0 +1,42 @@
+﻿using System;
+using System.Collections.Generic;
+using WoMFramework.Game.Enums;
+
+namespace WoMFramework.Game.Model
+{
+    public class SimpleModifier : Modifier
+    {
+        private Dictionary<ModifierType, Func<Entity, int>> modifierDict;
+
+        public SimpleModifier(ModifierType modifierType, Func<Entity, int> valueFunc)
+        {
+            modifierDict = new Dictionary<ModifierType, Func<Entity, int>> {{modifierType, valueFunc}};
+        }
+
+        public SimpleModifier(Dictionary<ModifierType, Func<Entity, int>> modifier)
+        {
+            modifierDict = modifier;
+        }
+
+        public override Action<Entity> AddMod => e =>
+        {
+            foreach (var keyValuePair in modifierDict)
+            {
+                e.MiscMod[keyValuePair.Key].Add(keyValuePair.Value);
+            }
+        };
+
+        public override Action<Entity> RemoveMod => e =>
+        {
+            foreach (var keyValuePair in modifierDict)
+            {
+                e.MiscMod[keyValuePair.Key].Remove(keyValuePair.Value);
+            }
+        };
+
+        public static SimpleModifier Get(ModifierType modifierType, Func<Entity, int> valueFunc)
+        {
+            return new SimpleModifier(modifierType, valueFunc);
+        }
+    }
+}
