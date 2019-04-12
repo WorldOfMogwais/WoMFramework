@@ -4,6 +4,7 @@ using System.Linq;
 using WoMFramework.Game.Enums;
 using WoMFramework.Game.Model.Actions;
 using WoMFramework.Game.Model.Classes;
+using WoMFramework.Game.Model.Learnable;
 using WoMFramework.Game.Random;
 
 namespace WoMFramework.Game.Model
@@ -58,40 +59,60 @@ namespace WoMFramework.Game.Model
         public int Strength => BaseStrength + MiscStrength + TempStrength;
         public int StrengthMod => Modifier(Strength);
         public int BaseStrength { get; set; }
-        public int MiscStrength => MiscMod[ModifierType.Strength].Sum(t => t.Invoke(this));
-        public int TempStrength => TempMod[ModifierType.Strength].Sum(t => t.Invoke(this));
+        public int MiscStrength => MiscMod(this, ModifierType.Strength);
+        public int TempStrength => TempMod(this, ModifierType.Strength);
 
         public int Dexterity => BaseDexterity + MiscDexterity + TempDexterity;
         public int DexterityMod => Modifier(Dexterity);
         public int BaseDexterity { get; set; }
-        public int MiscDexterity => MiscMod[ModifierType.Dexterity].Sum(t => t.Invoke(this));
-        public int TempDexterity => TempMod[ModifierType.Dexterity].Sum(t => t.Invoke(this));
+        public int MiscDexterity => MiscMod(this, ModifierType.Dexterity);
+        public int TempDexterity => TempMod(this, ModifierType.Dexterity);
 
         public int Constitution => BaseConstitution + MiscConstitution + TempConstitution;
         public int ConstitutionMod => Modifier(Constitution);
         public int BaseConstitution { get; set; }
-        public int MiscConstitution => MiscMod[ModifierType.Constitution].Sum(t => t.Invoke(this));
-        public int TempConstitution => TempMod[ModifierType.Constitution].Sum(t => t.Invoke(this));
+        public int MiscConstitution => MiscMod(this, ModifierType.Constitution);
+        public int TempConstitution => TempMod(this, ModifierType.Constitution);
 
         public int Inteligence => BaseInteligence + MiscInteligence + TempInteligence;
         public int InteligenceMod => Modifier(Inteligence);
         public int BaseInteligence { get; set; }
-        public int MiscInteligence => MiscMod[ModifierType.Inteligence].Sum(t => t.Invoke(this));
-        public int TempInteligence => TempMod[ModifierType.Inteligence].Sum(t => t.Invoke(this));
+        public int MiscInteligence => MiscMod(this, ModifierType.Inteligence);
+        public int TempInteligence => TempMod(this, ModifierType.Inteligence);
 
         public int Wisdom => BaseWisdom + MiscWisdom + TempWisdom;
         public int WisdomMod => Modifier(Wisdom);
         public int BaseWisdom { get; set; }
-        public int MiscWisdom => MiscMod[ModifierType.Wisdom].Sum(t => t.Invoke(this));
-        public int TempWisdom => TempMod[ModifierType.Wisdom].Sum(t => t.Invoke(this));
+        public int MiscWisdom => MiscMod(this, ModifierType.Wisdom);
+        public int TempWisdom => TempMod(this, ModifierType.Wisdom);
 
         public int Charisma => BaseCharisma + MiscCharisma + TempCharisma;
         public int CharismaMod => Modifier(Charisma);
         public int BaseCharisma { get; set; }
-        public int MiscCharisma => MiscMod[ModifierType.Charisma].Sum(t => t.Invoke(this));
-        public int TempCharisma => TempMod[ModifierType.Charisma].Sum(t => t.Invoke(this));
+        public int MiscCharisma => MiscMod(this, ModifierType.Charisma);
+        public int TempCharisma => TempMod(this, ModifierType.Charisma);
 
         private int Modifier(int ability) => (int)Math.Floor((ability - 10) / 2.0);
+
+        private int GetAbility(ModifierType modifierType) {
+            switch (modifierType)
+            {
+                case ModifierType.Strength:
+                    return StrengthMod;
+                case ModifierType.Dexterity:
+                    return DexterityMod;
+                case ModifierType.Constitution:
+                    return ConstitutionMod;
+                case ModifierType.Inteligence:
+                    return InteligenceMod;
+                case ModifierType.Wisdom:
+                    return WisdomMod;
+                case ModifierType.Charisma:
+                    return CharismaMod;
+                default:
+                    throw new Exception();
+            }
+        }
 
         #endregion
 
@@ -101,13 +122,13 @@ namespace WoMFramework.Game.Model
         public int BaseSpeed { get; set; }
 
         // calculate encumbarance and stuff like that ...
-        public int Speed => BaseSpeed + MiscMod[ModifierType.Speed].Sum(t => t.Invoke(this)) + TempMod[ModifierType.Speed].Sum(t => t.Invoke(this));
+        public int Speed => BaseSpeed + MiscMod(this, ModifierType.Speed) + TempMod(this, ModifierType.Speed);
 
         public int NaturalArmor { get; set; }
         // armorclass = 10 + armor bonus + shield bonus + dex modifier + size modifier + natural armor + deflection + misc modifier
         public int ArmorClass => 10 + Equipment.ArmorBonus + Equipment.ShieldBonus + DexterityMod + SizeType.Modifier() + NaturalArmor + MiscArmorClass + TempArmorClass;
-        public int MiscArmorClass => MiscMod[ModifierType.ArmorClass].Sum(t => t.Invoke(this));
-        public int TempArmorClass => TempMod[ModifierType.ArmorClass].Sum(t => t.Invoke(this));
+        public int MiscArmorClass => MiscMod(this, ModifierType.ArmorClass);
+        public int TempArmorClass => TempMod(this, ModifierType.ArmorClass);
 
         // hitpoints
         public int HitPointDice { get; set; }
@@ -122,34 +143,42 @@ namespace WoMFramework.Game.Model
 
         // initiative = dex modifier + misc modifier
         public int Initiative => DexterityMod + MiscInitiative + TempInitiative;
-        public int MiscInitiative => MiscMod[ModifierType.Initiative].Sum(t => t.Invoke(this));
-        public int TempInitiative => TempMod[ModifierType.Initiative].Sum(t => t.Invoke(this));
+        public int MiscInitiative => MiscMod(this, ModifierType.Initiative);
+        public int TempInitiative => TempMod(this, ModifierType.Initiative);
 
         #region saving throws
 
         //saving throw = basesave + abilitymod + misc modifier + magic modifier + temp modifier
         public int FortitudeBaseSave { get; set; }
         public int Fortitude => FortitudeBaseSave + ConstitutionMod + MiscFortitude + TempFortitude;
-        public int MiscFortitude => MiscMod[ModifierType.Fortitude].Sum(t => t.Invoke(this));
-        public int TempFortitude => TempMod[ModifierType.Fortitude].Sum(t => t.Invoke(this));
+        public int MiscFortitude => MiscMod(this, ModifierType.Fortitude);
+        public int TempFortitude => TempMod(this, ModifierType.Fortitude);
 
         public int ReflexBaseSave { get; set; }
         public int Reflex => ReflexBaseSave + DexterityMod + MiscReflex + TempReflex;
-        public int MiscReflex => MiscMod[ModifierType.Reflex].Sum(t => t.Invoke(this));
-        public int TempReflex => TempMod[ModifierType.Reflex].Sum(t => t.Invoke(this));
+        public int MiscReflex => MiscMod(this, ModifierType.Reflex);
+        public int TempReflex => TempMod(this, ModifierType.Reflex);
 
         public int WillBaseSave { get; set; }
         public int Will => WillBaseSave + WisdomMod + MiscWill + TempWill;
-        public int MiscWill => MiscMod[ModifierType.Reflex].Sum(t => t.Invoke(this));
-        public int TempWill => TempMod[ModifierType.Reflex].Sum(t => t.Invoke(this));
+        public int MiscWill => MiscMod(this, ModifierType.Will);
+        public int TempWill => TempMod(this, ModifierType.Will);
 
         #endregion
 
         // base attack bonus = class dependent value
         public int[] BaseAttackBonus { get; set; } = new int[] { 0 };
 
+        // combat maneuver bonus
+        public int Cmb => BaseAttackBonus[0] + StrengthMod + SizeType.Modifier() + MiscCmb;
+        public int MiscCmb => MiscMod(this, ModifierType.CMB);
+
+        // combat maneuver defense
+        public int Cmd => 10 + BaseAttackBonus[0] + StrengthMod + DexterityMod + SizeType.Modifier() + MiscCmd;
+        public int MiscCmd => MiscMod(this, ModifierType.CMD);
+
         // attackbonus = base attack bonus + strength modifier + size modifier
-        public int AttackBonus(int attackIndex) => BaseAttackBonus[attackIndex] + StrengthMod + (int)SizeType + MiscMod[ModifierType.AttackBonus].Sum(t => t.Invoke(this)) + TempMod[ModifierType.AttackBonus].Sum(t => t.Invoke(this));
+        public int AttackBonus(int attackIndex) => BaseAttackBonus[attackIndex] + StrengthMod + SizeType.Modifier() + MiscMod(this, ModifierType.AttackBonus) + TempMod(this, ModifierType.AttackBonus);
 
         // attack roll
         public int[] AttackRolls(int attackIndex, int criticalMinRoll = 21)
@@ -174,7 +203,7 @@ namespace WoMFramework.Game.Model
             var damage = dice.Roll(WeaponDamage(weapon));
             return damage < 1 ? 1 : damage;
         }
-        public int[] WeaponDamage(Weapon weapon) => new int[] { weapon.DamageRoll[0], weapon.DamageRoll[1], 0, weapon.DamageRoll[3] + WeaponStrengthMod(weapon)};
+        public int[] WeaponDamage(Weapon weapon) => new int[] { weapon.DamageRoll[0], weapon.DamageRoll[1], 0, weapon.DamageRoll[3] + WeaponStrengthMod(weapon) };
         public int WeaponStrengthMod(Weapon weapon) => (weapon.WeaponEffortType == WeaponEffortType.TwoHanded ? (int)Math.Floor(1.5 * StrengthMod) : StrengthMod);
 
         // injury and death
@@ -213,7 +242,7 @@ namespace WoMFramework.Game.Model
         public virtual Dice Dice { get; set; }
 
         //public Classes.Classes CurrentClass => Classes.Count > 0 ? Classes[0] : null;
-        public List<Classes.EntityClass> Classes { get; }
+        public List<EntityClass> Classes { get; }
         public int GetClassLevel(ClassType classType)
         {
             var classes = Classes.FirstOrDefault(p => p.ClassType == classType);
@@ -221,6 +250,19 @@ namespace WoMFramework.Game.Model
         }
 
         public EnvironmentType[] EnvironmentTypes { get; set; }
+
+        public List<Skill> BasicSkills { get; set; }
+
+        public int BasicSkill(SkillType skillType)
+        {
+            var array = BasicSkillInfo(skillType);
+            return array.Sum();
+        }
+
+        public int[] BasicSkillInfo(SkillType skillType) {
+            var skill = BasicSkills.Where(p => p.SkillType == skillType).First();
+            return new int[] { GetAbility(skill.KeyAbility), skill.Ranks, MiscMod(this, (ModifierType)Enum.Parse(typeof(ModifierType), skillType.ToString()))};
+        }
 
         public List<Feat> Feats { get; set; }
 
@@ -241,10 +283,13 @@ namespace WoMFramework.Game.Model
             HitPointLevelRolls = new List<int>();
             Equipment = new Equipment();
             Gold = 0;
-            Classes = new List<Classes.EntityClass>();
+            Classes = new List<EntityClass>();
 
             // add basic actions
             CombatActions = new List<CombatAction>();
+
+            // add all basic skills
+            BasicSkills = Skills.GetAll();
 
             // initialize skills list
             Feats = new List<Feat>();
@@ -302,7 +347,7 @@ namespace WoMFramework.Game.Model
             FortitudeBaseSave = Classes.Sum(p => p.FortitudeBaseSave);
             ReflexBaseSave = Classes.Sum(p => p.ReflexBaseSave);
             WillBaseSave = Classes.Sum(p => p.WillBaseSave);
-            
+
             // hit point roll
             if (hitPointLevelRoll == 0)
             {
@@ -311,7 +356,21 @@ namespace WoMFramework.Game.Model
             }
             HitPointLevelRolls.Add(hitPointLevelRoll);
 
-            Classes.ForEach(p => p.Learnables.ForEach(q => Learn(q)));
+
+            // learn new class learnables
+            Classes[0].Learnables.ForEach(q => Learn(q));
+
+            // learn new class basic skills
+            if (Classes[0].ClassLevel == 1)
+            {
+                foreach(Skill skill in BasicSkills)
+                {
+                    if (Classes[0].ClassBasicSkills.Contains(skill.SkillType))
+                    {
+                        skill.IsClassSkill = true;
+                    }
+                }
+            }
 
             // initial class level
             if (doWealth && classesLevels == 0)
@@ -397,8 +456,8 @@ namespace WoMFramework.Game.Model
         {
             slot = Equipment.Slots.Where(p => p.SlotType == slotType).ElementAtOrDefault(slotIndex);
 
-            return Inventory.Contains(baseItem) 
-                   && baseItem.SlotType == slotType 
+            return Inventory.Contains(baseItem)
+                   && baseItem.SlotType == slotType
                    && slot != null;
         }
 
@@ -471,8 +530,8 @@ namespace WoMFramework.Game.Model
         {
             slot = Equipment.GetWeaponSlot(slotIndex);
 
-            return Inventory.Contains(weapon) 
-                   && weapon.SlotType == slotType 
+            return Inventory.Contains(weapon)
+                   && weapon.SlotType == slotType
                    && slot != null;
         }
 

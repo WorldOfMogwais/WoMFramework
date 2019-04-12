@@ -96,34 +96,43 @@ namespace WoMFramework.Game.Enums
         Acrobatics,
         Appraise,
         Bluff,
-        Balance,
-        Craft,
         Climb,
+        Craft,
         Diplomacy,
         DisableDevice,
         Disguise,
         EscapeArtist,
         Fly,
         HandleAnimal,
-        Intimidate,
         Heal,
-        Knowledge,
+        Intimidate,
+        KnowledgeArcana,
+        KnowledgeDungeoneering,
+        KnowledgeEngineering,
+        KnowledgeGeography,
+        KnowledgeHistory,
+        KnowledgeLocal,
+        KnowledgeNature,
+        KnowledgeNobility,
+        KnowledgePlanes,
+        KnowledgeReligion,
         Linguistics,
         Perception,
         Perform,
         Profession,
-        SenseMotive,
         Ride,
+        SenseMotive,
+        SleightOfHand,
         Spellcraft,
         Stealth,
         Survival,
         Swim,
-        UseMagicDevice,
-        SleightOfHand
+        UseMagicDevice
     }
 
     public enum SkillSubType
     {
+        None,
         Arcana,
         Dungeoneering,
         Engineering,
@@ -185,11 +194,6 @@ namespace WoMFramework.Game.Enums
         Rope
     }
 
-    public enum EvolutionPattern
-    {
-        None
-    }
-
     public enum HealthState
     {
         Healthy = 1,
@@ -237,6 +241,16 @@ namespace WoMFramework.Game.Enums
         Weapon
     }
 
+    public enum AbilityType
+    {
+        Strength,
+        Dexterity,
+        Constitution,
+        Inteligence,
+        Wisdom,
+        Charisma
+    }
+
     public enum ModifierType
     {
         Strength,
@@ -252,7 +266,47 @@ namespace WoMFramework.Game.Enums
         Reflex,
         Will,
         AttackBonus,
-        ArmorClass
+        ArmorClass,
+        CMB,
+        CMD,
+
+        Acrobatics,
+        Appraise,
+        Balance,
+        Bluff,
+        Climb,
+        Craft,
+        Diplomacy,
+        DisableDevice,
+        Disguise,
+        EscapeArtist,
+        Fly,
+        HandleAnimal,
+        Heal,
+        Intimidate,
+        Knowledge,
+        KnowledgeArcana,
+        KnowledgeDungeoneering,
+        KnowledgeEngineering,
+        KnowledgeGeography,
+        KnowledgeHistory,
+        KnowledgeLocal,
+        KnowledgeNature,
+        KnowledgeNobility,
+        KnowledgePlanes,
+        KnowledgeReligion,
+        Linguistics,
+        Perception,
+        Perform,
+        Profession,
+        Ride,
+        SenseMotive,
+        SleightOfHand,
+        Spellcraft,
+        Stealth,
+        Survival,
+        Swim,
+        UseMagicDevice,
     }
 
     public enum LootState

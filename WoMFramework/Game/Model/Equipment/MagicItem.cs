@@ -37,6 +37,22 @@ namespace WoMFramework.Game.Model
 
     public class MagicItems
     {
+        public static MagicItem RingOfAcrobatics()
+        {
+            return new MagicItem("Ring of Acrobatics",
+                new List<Modifier>()
+                {
+                    new SimpleModifier(ModifierType.Acrobatics, (Entity) => 1)
+                },
+                new List<CombatAction>(),
+                1D,
+                0.1D,
+                "This belt is a fucking artist ring.",
+                RarityType.Magic,
+                SlotType.Ring
+            );
+        }
+
         public static MagicItem BeltOfGiantStrength()
         {
             return new MagicItem("Belt of Giant Strength",

@@ -22,7 +22,7 @@ namespace WoMFramework.Game.Model
         {
             foreach (var keyValuePair in modifierDict)
             {
-                e.MiscMod[keyValuePair.Key].Add(keyValuePair.Value);
+                e.MiscModDict()[keyValuePair.Key].Add(keyValuePair.Value);
             }
         };
 
@@ -30,7 +30,7 @@ namespace WoMFramework.Game.Model
         {
             foreach (var keyValuePair in modifierDict)
             {
-                e.MiscMod[keyValuePair.Key].Remove(keyValuePair.Value);
+                e.MiscModDict()[keyValuePair.Key].Remove(keyValuePair.Value);
             }
         };
 
