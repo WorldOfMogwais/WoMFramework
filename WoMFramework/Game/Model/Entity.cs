@@ -45,6 +45,48 @@ namespace WoMFramework.Game.Model
         }
     }
 
+    public class BaseProperty
+    {
+        private Entity entity;
+
+        public string Name { get; set; }
+        public string Abreviation { get; set; }
+        public bool IsMod { get; set; } = false;
+        public int? BaseValue { get; set; } = null;
+        public short? FixValue { get; set; } = null;
+        public List<BaseProperty> Mods { get; set; }
+        public List<Func<Entity, int>> Miscs { get; set; }
+        public List<Func<Entity, int>> Temps { get; set; }
+
+        public BaseProperty(string name, string abreviation, bool isMod, int baseValue)
+        {
+            Name = name;
+            Abreviation = abreviation;
+            IsMod = isMod;
+            BaseValue = baseValue;
+            Mods = new List<BaseProperty>();
+            Miscs = new List<Func<Entity, int>>();
+            Temps = new List<Func<Entity, int>>();
+        }
+
+        public int Misc => Miscs.Sum(t => t.Invoke(entity));
+
+        public int Temp => Temps.Sum(t => t.Invoke(entity));
+
+        public int Get
+        {
+            get
+            {
+                if (IsMod)
+                {
+                    return (int)Math.Floor(((int)BaseValue + Misc + Temp - 10) / 2.0);
+                }
+
+                return (BaseValue != null ? (int)BaseValue : 0) + (FixValue != null ? (int)FixValue : 0) + Mods.Sum(t => t.Get) + Misc + Temp;
+            }
+        }
+    }
+
     public abstract partial class Entity : SpellEnabled
     {
         public string Name { get; set; }
@@ -54,47 +96,52 @@ namespace WoMFramework.Game.Model
 
         public SizeType SizeType { get; set; }
 
+        public Dictionary<string, BaseProperty> Properties { get; set; } = new Dictionary<string, BaseProperty>()
+        {
+            { "StrengthMod", new BaseProperty("StrengthMod", "STR", true, 10) }
+        };
+
         #region abilities
 
-        public int Strength => BaseStrength + MiscStrength + TempStrength;
-        public int StrengthMod => Modifier(Strength);
+        public BaseProperty StrengthModProperty => new BaseProperty("StrengthMod", "STR", true, 10);
+        public int Strength => (int) StrengthModProperty.BaseValue + StrengthModProperty.Misc + StrengthModProperty.Temp;
+        public int StrengthMod => StrengthModProperty.Get;
         public int BaseStrength { get; set; }
         public int MiscStrength => MiscMod(this, ModifierType.Strength);
         public int TempStrength => TempMod(this, ModifierType.Strength);
 
         public int Dexterity => BaseDexterity + MiscDexterity + TempDexterity;
-        public int DexterityMod => Modifier(Dexterity);
+        public int DexterityMod => Helper.Modifier(Dexterity);
         public int BaseDexterity { get; set; }
         public int MiscDexterity => MiscMod(this, ModifierType.Dexterity);
         public int TempDexterity => TempMod(this, ModifierType.Dexterity);
 
         public int Constitution => BaseConstitution + MiscConstitution + TempConstitution;
-        public int ConstitutionMod => Modifier(Constitution);
+        public int ConstitutionMod => Helper.Modifier(Constitution);
         public int BaseConstitution { get; set; }
         public int MiscConstitution => MiscMod(this, ModifierType.Constitution);
         public int TempConstitution => TempMod(this, ModifierType.Constitution);
 
         public int Inteligence => BaseInteligence + MiscInteligence + TempInteligence;
-        public int InteligenceMod => Modifier(Inteligence);
+        public int InteligenceMod => Helper.Modifier(Inteligence);
         public int BaseInteligence { get; set; }
         public int MiscInteligence => MiscMod(this, ModifierType.Inteligence);
         public int TempInteligence => TempMod(this, ModifierType.Inteligence);
 
         public int Wisdom => BaseWisdom + MiscWisdom + TempWisdom;
-        public int WisdomMod => Modifier(Wisdom);
+        public int WisdomMod => Helper.Modifier(Wisdom);
         public int BaseWisdom { get; set; }
         public int MiscWisdom => MiscMod(this, ModifierType.Wisdom);
         public int TempWisdom => TempMod(this, ModifierType.Wisdom);
 
         public int Charisma => BaseCharisma + MiscCharisma + TempCharisma;
-        public int CharismaMod => Modifier(Charisma);
+        public int CharismaMod => Helper.Modifier(Charisma);
         public int BaseCharisma { get; set; }
         public int MiscCharisma => MiscMod(this, ModifierType.Charisma);
         public int TempCharisma => TempMod(this, ModifierType.Charisma);
 
-        private int Modifier(int ability) => (int)Math.Floor((ability - 10) / 2.0);
-
-        private int GetAbility(ModifierType modifierType) {
+        private int GetAbility(ModifierType modifierType)
+        {
             switch (modifierType)
             {
                 case ModifierType.Strength:
@@ -259,9 +306,10 @@ namespace WoMFramework.Game.Model
             return array.Sum();
         }
 
-        public int[] BasicSkillInfo(SkillType skillType) {
+        public int[] BasicSkillInfo(SkillType skillType)
+        {
             var skill = BasicSkills.Where(p => p.SkillType == skillType).First();
-            return new int[] { GetAbility(skill.KeyAbility), skill.Ranks, MiscMod(this, (ModifierType)Enum.Parse(typeof(ModifierType), skillType.ToString()))};
+            return new int[] { GetAbility(skill.KeyAbility), skill.Ranks, MiscMod(this, (ModifierType)Enum.Parse(typeof(ModifierType), skillType.ToString())) };
         }
 
         public List<Feat> Feats { get; set; }
@@ -363,7 +411,7 @@ namespace WoMFramework.Game.Model
             // learn new class basic skills
             if (Classes[0].ClassLevel == 1)
             {
-                foreach(Skill skill in BasicSkills)
+                foreach (Skill skill in BasicSkills)
                 {
                     if (Classes[0].ClassBasicSkills.Contains(skill.SkillType))
                     {
